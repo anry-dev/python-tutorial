@@ -18,6 +18,13 @@ class NewVisitonTest(unittest.TestCase):
         '''shutdown'''
         self.browser.quit()
 
+    def check_for_row_in_list_table(self, row_text):
+        '''checking for str to present in the list table'''
+
+        table = self.browser.find_element(By.ID, 'id_list_table')
+        rows = table.find_elements(By.TAG_NAME, 'tr')
+        self.assertIn(row_text, [row.text for row in rows])
+
     def test_can_start_a_list_and_retrieve_it_later(self):
         '''тест: можно создать список дел и получить их потом'''
         # Эдит слышала про крутое новое онлайн-приложение со списком
@@ -46,13 +53,7 @@ class NewVisitonTest(unittest.TestCase):
         inputbox.send_keys(Keys.ENTER)
         time.sleep(1)
 
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        #self.assertTrue(
-        #        any(row.text == '1: Купить павлиньи перья' for row in rows),
-        #        f"Новый элемент списка не появился в таблице. Содержимое было:\n'{table.text}'"
-        #)
-        self.assertIn('1: Купить павлиньи перья', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
 
         # Текстовое поле по-прежнему приглашает ее добавить еще один элемент.
         # Она вводит "Сделать мушку из павлиньих перьев"
@@ -63,10 +64,8 @@ class NewVisitonTest(unittest.TestCase):
         time.sleep(1)
 
         # Страница снова обновляется, и теперь показывает оба элемента ее списка
-        table = self.browser.find_element(By.ID, 'id_list_table')
-        rows = table.find_elements(By.TAG_NAME, 'tr')
-        self.assertIn('1: Купить павлиньи перья', [row.text for row in rows])
-        self.assertIn('2: Сделать мушку из павлиньих перьев', [row.text for row in rows])
+        self.check_for_row_in_list_table('1: Купить павлиньи перья')
+        self.check_for_row_in_list_table('2: Сделать мушку из павлиньих перьев')
 
 
         # Эдит интересно, запомнит ли сайт ее список. Далее она видит, что
