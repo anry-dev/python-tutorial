@@ -57,10 +57,10 @@ class NewVisitonTest(LiveServerTestCase):
         # Она набирает в текстовом поле "Купить павлиньи перья" (ее хобби –
         # вязание рыболовных мушек)
         inputbox.send_keys('Купить павлиньи перья')
+        inputbox.send_keys(Keys.ENTER)
 
         # Когда она нажимает enter, страница обновляется, и теперь страница
         # содержит "1: Купить павлиньи перья" в качестве элемента списка
-        inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: Купить павлиньи перья')
 
         # Текстовое поле по-прежнему приглашает ее добавить еще один элемент.
@@ -74,14 +74,63 @@ class NewVisitonTest(LiveServerTestCase):
         self.wait_for_row_in_list_table('1: Купить павлиньи перья')
         self.wait_for_row_in_list_table('2: Сделать мушку из павлиньих перьев')
 
-
         # Эдит интересно, запомнит ли сайт ее список. Далее она видит, что
         # сайт сгенерировал для нее уникальный URL-адрес – об этом
-        self.fail('Закончить написание тестов!!!')
 
         # выводится небольшой текст с объяснениями.
         # Она посещает этот URL-адрес – ее список по-прежнему там.
         # Удовлетворенная, она снова ложится спать
+
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        '''test: different users can create lists on different urls'''
+
+        # Эдит начинает новый список
+        self.browser.get(self.live_server_url)
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Купить павлиньи перья')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Купить павлиньи перья')
+        
+        # Она замечает, что ее список имеет новый URL адрес
+        edith_list_url = self.browser.current_url
+        self.assertRegex(edith_list_url, '/lists/.+')
+
+        # Появляется новый пользователь Фрэнсис
+        ## Мы используем новый сеанс браузера, чтобы никакая информация от Эдит не прошла
+        ## через cookies и т.д.
+        self.browser.quit()
+        self.browser = webdriver.Firefox()
+
+        # Фрэнсис посещает домашнюю страничку, накаких списов от Эдит он не видит
+        self.browser.get(self.live_server_url)
+        page_text = table.find_elements(By.TAG_NAME, 'body').text
+        self.assertNotIn('Купить павлиньи перья', page_text)
+        self.assertNotIn('Сделать мушку', page_text)
+
+        # Фрэнсис создает свой список дел - он попроще
+        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox.send_keys('Купить молоко')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Купить молоко')
+
+        # Фрэнсис получает новый URL для своего списка
+        francis_list_url = self.browser.current_url
+        self.assertRegex(fancis_list_url, '/lists/.+')
+        
+        # у Фрэнсис и у Эдит разные URL
+        self.assertNotEqual(edith_list_url, francis_list_url)
+
+        # у Фрэнсис нет ни одно элемента от Эдит
+        page_text = table.find_elements(By.TAG_NAME, 'body').text
+        self.assertNotIn('Купить павлиньи перья', page_text)
+        self.assertNotIn('Сделать мушку', page_text)
+
+        # у Фрэнсис есть свое дело
+        self.assertIn('1: Купить молоко', page_text)
+
+    def test_fail(self):
+        '''test: functional tests are not done yet!'''
+        self.fail('Закончить написание тестов!!!')
 
 if __name__ == '__main__':
     unittest.main(warnings='ignore')
