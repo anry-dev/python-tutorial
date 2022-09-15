@@ -115,13 +115,13 @@ class NewVisitonTest(LiveServerTestCase):
 
         # Фрэнсис получает новый URL для своего списка
         francis_list_url = self.browser.current_url
-        self.assertRegex(fancis_list_url, '/lists/.+')
+        self.assertRegex(francis_list_url, '/lists/.+')
         
         # у Фрэнсис и у Эдит разные URL
         self.assertNotEqual(edith_list_url, francis_list_url)
 
         # у Фрэнсис нет ни одно элемента от Эдит
-        page_text = table.find_elements(By.TAG_NAME, 'body').text
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
         self.assertNotIn('Купить павлиньи перья', page_text)
         self.assertNotIn('Сделать мушку', page_text)
 

@@ -8,17 +8,30 @@ def home_page(request):
 
     return render(request, 'home.html')
 
-def view_list(request):
+def view_list(request, list_id):
     '''list view'''
 
-    items = Item.objects.all()
-    return render(request, 'list.html', {'items': items})
+    current_list = List.objects.get(id=list_id)
+    return render(request, 'list.html', {'list': current_list})
+    #items = Item.objects.filter(list=current_list)
+    #return render(request, 'list.html', {'items': items})
 
 def new_list(request):
     '''new list'''
 
     if request.method == 'POST':
-        list_ = List.objects.create()
-        Item.objects.create(text=request.POST['item_text'], list=list_)
+        new_list = List.objects.create()
+        Item.objects.create(text=request.POST['item_text'], list=new_list)
+        return redirect(f'/lists/{new_list.id}/')
 
-    return redirect('/lists/the_uniq_url_in_the_world/')
+    return redirect('/')
+
+def add_item(request, list_id):
+    '''add item to the list'''
+
+    if request.method == 'POST':
+        current_list = List.objects.get(id=list_id)
+        Item.objects.create(text=request.POST['item_text'], list=current_list)
+        return redirect(f'/lists/{current_list.id}/')
+
+    return redirect('/')
