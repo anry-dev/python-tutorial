@@ -2,7 +2,7 @@ from django.test import TestCase
 from django.urls import resolve
 from lists.views import home_page
 from django.template.loader import render_to_string
-from lists.models import Item
+from lists.models import Item, List
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -14,17 +14,27 @@ class HomePageTest(TestCase):
         html = response.content.decode('utf8')
         self.assertTemplateUsed(response, 'home.html')
 
-class ItemModelTest(TestCase):
+class ListAndItemModelTest(TestCase):
     '''List elements model tests'''
 
     def test_saving_and_retrieving_items(self):
         '''test to save and retrieve an item'''
+
+        list_ = List()
+        list_.save()
+
         first_item = Item()
         first_item.text = 'Just the first item!'
+        first_item.list = list_
         first_item.save()
+
         second_item = Item()
         second_item.text = 'The second item.'
+        second_item.list = list_
         second_item.save()
+
+        saved_list = List.objects.first()
+        self.assertEqual(saved_list, list_)
 
         saved_items = Item.objects.all()
         self.assertEqual(saved_items.count(), 2)
@@ -32,7 +42,9 @@ class ItemModelTest(TestCase):
         first_saved_item = saved_items[0]
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'Just the first item!')
+        self.assertEqual(first_saved_item.list, list_)
         self.assertEqual(second_saved_item.text, 'The second item.')
+        self.assertEqual(second_saved_item.list, list_)
 
 class ListViewTest(TestCase):
     '''List view tests'''
@@ -45,8 +57,9 @@ class ListViewTest(TestCase):
 
     def test_displays_all_list_items(self):
         '''test: home page displays all list elements'''
-        Item.objects.create(text='item 1')
-        Item.objects.create(text='item 2')
+        list_ = List.objects.create()
+        Item.objects.create(text='item 1', list=list_)
+        Item.objects.create(text='item 2', list=list_)
 
         response = self.client.get('/lists/the_uniq_url_in_the_world/')
 
