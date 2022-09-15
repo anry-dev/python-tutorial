@@ -8,12 +8,7 @@ from lists.models import Item
 class HomePageTest(TestCase):
     '''test for correct home page'''
 
-    def test_root_url_resolves_to_home_page_views(self):
-        '''тест: корневой url преобразуется в представление домашней страницы'''
-        found = resolve('/')
-        self.assertEqual(found.func, home_page)
-
-    def test_root_url_returns_correct_html(self):
+    def test_uses_home_template(self):
         '''test: home page must return correct html'''
         response = self.client.get('/')
         html = response.content.decode('utf8')
@@ -30,7 +25,7 @@ class HomePageTest(TestCase):
         '''test: POST request return redirect to home page'''
         response = self.client.post('/', data={'item_text': 'A new list item'})
         self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/')
+        self.assertEqual(response['location'], '/lists/the_uniq_url_in_the_world/')
         ##self.assertIn('A new list item', response.content.decode())
         ##self.assertTemplateUsed(response, 'home.html')
 
@@ -38,16 +33,6 @@ class HomePageTest(TestCase):
         '''test: save items only when it is needed'''
         response = self.client.get('/')
         self.assertEqual(Item.objects.count(), 0)
-
-    def test_displays_all_list_items(self):
-        '''test: home page displays all list elements'''
-        Item.objects.create(text='item 1')
-        Item.objects.create(text='item 2')
-
-        response = self.client.get('/')
-
-        self.assertIn('item 1', response.content.decode())
-        self.assertIn('item 2', response.content.decode())
 
 class ItemModelTest(TestCase):
     '''List elements model tests'''
@@ -68,3 +53,23 @@ class ItemModelTest(TestCase):
         second_saved_item = saved_items[1]
         self.assertEqual(first_saved_item.text, 'Just the first item!')
         self.assertEqual(second_saved_item.text, 'The second item.')
+
+class ListViewTest(TestCase):
+    '''List view tests'''
+
+    def test_uses_list_template(self):
+        '''test: using list template'''
+        response = self.client.get('/lists/the_uniq_url_in_the_world/')
+        html = response.content.decode('utf8')
+        self.assertTemplateUsed(response, 'list.html')
+
+    def test_displays_all_list_items(self):
+        '''test: home page displays all list elements'''
+        Item.objects.create(text='item 1')
+        Item.objects.create(text='item 2')
+
+        response = self.client.get('/lists/the_uniq_url_in_the_world/')
+
+        self.assertContains(response, 'item 1')
+        self.assertContains(response, 'item 2')
+

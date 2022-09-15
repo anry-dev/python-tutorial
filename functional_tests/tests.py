@@ -103,7 +103,7 @@ class NewVisitonTest(LiveServerTestCase):
 
         # Фрэнсис посещает домашнюю страничку, накаких списов от Эдит он не видит
         self.browser.get(self.live_server_url)
-        page_text = table.find_elements(By.TAG_NAME, 'body').text
+        page_text = self.browser.find_element(By.TAG_NAME, 'body').text
         self.assertNotIn('Купить павлиньи перья', page_text)
         self.assertNotIn('Сделать мушку', page_text)
 
@@ -128,9 +128,9 @@ class NewVisitonTest(LiveServerTestCase):
         # у Фрэнсис есть свое дело
         self.assertIn('1: Купить молоко', page_text)
 
-    def test_fail(self):
+    def test_zzz_fail(self):
         '''test: functional tests are not done yet!'''
         self.fail('Закончить написание тестов!!!')
 
-if __name__ == '__main__':
-    unittest.main(warnings='ignore')
+#if __name__ == '__main__':
+#    unittest.main(warnings='ignore')
