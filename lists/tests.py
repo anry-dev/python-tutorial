@@ -8,10 +8,17 @@ from lists.models import Item, List
 class HomePageTest(TestCase):
     '''test for correct home page'''
 
-    def test_uses_home_template(self):
-        '''test: home page must return correct html'''
+    def test_root_uses_home_template(self):
+        '''test: root home page must return correct html'''
         response = self.client.get('/')
         html = response.content.decode('utf8')
+        self.assertTemplateUsed(response, 'home.html')
+
+    def test_lists_uses_home_template(self):
+        '''test: lists home page must return correct html'''
+        response = self.client.get('/lists/')
+        html = response.content.decode('utf8')
+        self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
 
 class ListAndItemModelTest(TestCase):
