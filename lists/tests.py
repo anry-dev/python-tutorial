@@ -14,26 +14,6 @@ class HomePageTest(TestCase):
         html = response.content.decode('utf8')
         self.assertTemplateUsed(response, 'home.html')
 
-    def test_can_save_a_POST_request(self):
-        '''test: home pages save a POST request'''
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(Item.objects.count(), 1)
-        new_item = Item.objects.first()
-        self.assertEqual(new_item.text, 'A new list item')
-
-    def test_get_redirect_after_POST_request(self):
-        '''test: POST request return redirect to home page'''
-        response = self.client.post('/', data={'item_text': 'A new list item'})
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response['location'], '/lists/the_uniq_url_in_the_world/')
-        ##self.assertIn('A new list item', response.content.decode())
-        ##self.assertTemplateUsed(response, 'home.html')
-
-    def test_save_items_only_when_necessary(self):
-        '''test: save items only when it is needed'''
-        response = self.client.get('/')
-        self.assertEqual(Item.objects.count(), 0)
-
 class ItemModelTest(TestCase):
     '''List elements model tests'''
 
@@ -72,4 +52,29 @@ class ListViewTest(TestCase):
 
         self.assertContains(response, 'item 1')
         self.assertContains(response, 'item 2')
+
+class NewViewTest(TestCase):
+    '''test creating a new list'''
+
+    def test_get_request_doesn_fail(self):
+        '''test: get request doesnt fail'''
+        response = self.client.get('/lists/new')
+        self.assertEqual(response.status_code, 302)
+
+    def test_url_with_slash_not_works(self):
+        '''test: url with ending slash doesnt work'''
+        response = self.client.get('/lists/new/')
+        self.assertEqual(response.status_code, 404)
+
+    def test_can_save_a_POST_request(self):
+        '''test: save a POST request'''
+        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        self.assertEqual(Item.objects.count(), 1)
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'A new list item')
+
+    def test_get_redirect_after_POST_request(self):
+        '''test: POST request return redirect to home page'''
+        response = self.client.post('/lists/new', data={'item_text': 'A new list item'})
+        self.assertRedirects(response, '/lists/the_uniq_url_in_the_world/')
 
