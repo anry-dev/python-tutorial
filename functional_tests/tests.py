@@ -35,7 +35,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
                     raise e
                 time.sleep(0.5)
 
-    @unittest.skip("layout testing")
+    #@unittest.skip("layout testing")
     def test_can_start_a_list_and_retrieve_it_later(self):
         '''тест: можно создать список дел и получить их потом'''
         # Эдит слышала про крутое новое онлайн-приложение со списком
@@ -82,7 +82,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
         # Она посещает этот URL-адрес – ее список по-прежнему там.
         # Удовлетворенная, она снова ложится спать
 
-    @unittest.skip("layout testing")
+    #@unittest.skip("layout testing")
     def test_multiple_users_can_start_lists_at_different_urls(self):
         '''test: different users can create lists on different urls'''
 
