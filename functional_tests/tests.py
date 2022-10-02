@@ -7,6 +7,7 @@ from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
 import time
 import unittest
+import os
 
 MAX_WAIT = 10
 
@@ -16,6 +17,10 @@ class NewVisitonTest(StaticLiveServerTestCase):
     def setUp(self):
         '''setup'''
         self.browser = webdriver.Firefox()
+        staging_server = os.environ.get('STAGING_SERVER')
+        if staging_server:
+            print('Setting staging server to: %s' % (staging_server,))
+            self.live_server_url = 'http://' + staging_server
 
     def tearDown(self):
         '''shutdown'''
@@ -35,7 +40,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
                     raise e
                 time.sleep(0.5)
 
-    #@unittest.skip("layout testing")
+    @unittest.skip("layout testing")
     def test_can_start_a_list_and_retrieve_it_later(self):
         '''тест: можно создать список дел и получить их потом'''
         # Эдит слышала про крутое новое онлайн-приложение со списком
@@ -82,7 +87,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
         # Она посещает этот URL-адрес – ее список по-прежнему там.
         # Удовлетворенная, она снова ложится спать
 
-    #@unittest.skip("layout testing")
+    @unittest.skip("layout testing")
     def test_multiple_users_can_start_lists_at_different_urls(self):
         '''test: different users can create lists on different urls'''
 
