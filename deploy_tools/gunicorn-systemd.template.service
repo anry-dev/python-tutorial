@@ -7,7 +7,7 @@ User=__USER__
 WorkingDirectory=__ROOT__/sites/__SITENAME__/source
 ExecStart=__ROOT__/sites/__SITENAME__/virtualenv/bin/gunicorn \
 	--bind unix:/tmp/__SITENAME__.socket \
-	superlists.wsgi:application
+	superlist.wsgi:application
 
 [Install]
 WantedBy=multi-user.target
