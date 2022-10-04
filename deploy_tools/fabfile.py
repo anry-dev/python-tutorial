@@ -44,10 +44,11 @@ def _update_settings(source_folder, site_name):
     '''обновить настройки'''
 
     settings_path = source_folder + '/superlist/settings.py'
-    sed(settings_path, "DEBUG = True", "DEBUG = False")
+    sed(settings_path, "DEBUG = True", "DEBUG = False", backup='')
     sed(settings_path,
         'ALLOWED_HOSTS =.+$',
-        f'ALLOWED_HOSTS = ["{site_name}"]'
+        f'ALLOWED_HOSTS = ["{site_name}"]',
+        backup=''
     )
 
     # other methods
