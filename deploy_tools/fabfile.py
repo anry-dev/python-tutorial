@@ -4,6 +4,12 @@ import random
 
 REPO_URL = 'https://github.com/anry-dev/python-tutorial.git'
 
+def test():
+    '''testing separate methods'''
+    site_folder = f'/home/{env.user}/sites/{env.host}'
+    source_folder = site_folder + '/source'
+    #_update_settings(source_folder, env.host)
+
 def deploy():
     '''разворачивание сайта'''
 
@@ -44,12 +50,18 @@ def _update_settings(source_folder, site_name):
         f'ALLOWED_HOSTS = ["{site_name}"]'
     )
 
-    secret_key_file = source_folder + '/superlist/secret_key.py'
+    # other methods
+    # src: https://stackoverflow.com/a/57678930
+    # from django.core.management.utils import get_random_secret_key  
+    # get_random_secret_key()
+    #
+    # or: https://humberto.io/blog/tldr-generate-django-secret-key/
+    # import secrets; print(secrets.token_urlsafe(50))
+    secret_key_file = source_folder + '/.secret_key'
     if not exists(secret_key_file):
         chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
         key = ''.join(random.SystemRandom().choice(chars) for _ in range(50))
-        append(secret_key_file, f'SECRET_KEY = "{key}"')
-    append(settings_path, '\nfrom .secret_key import SECRET_KEY')
+        append(secret_key_file, key)
 
 def _update_virtualenv(source_folder):
     '''обновить виртуальную среду'''
@@ -84,9 +96,10 @@ def _update_nginx(source_folder):
         f'cd {source_folder}'
         f' && cp deploy_tools/nginx.template.conf {nginx_conf}'
     )
-    sed(nginx_conf, "__SITENAME__", env.host, use_sudo=True)
-    sed(nginx_conf, "__ROOT__", f'/home/{env.user}', use_sudo=True)
-    sudo(f'ln -s {nginx_conf} /etc/nginx/sites-enabled')
+    sed(nginx_conf, "__SITENAME__", env.host, use_sudo=True, backup='')
+    sed(nginx_conf, "__ROOT__", f'/home/{env.user}', use_sudo=True, backup='')
+    sudo(f'ln -f -s {nginx_conf} /etc/nginx/sites-enabled/')
+    sudo('systemctl restart nginx')
 
 def _update_systemd(source_folder):
     '''update systemd config'''
@@ -94,10 +107,10 @@ def _update_systemd(source_folder):
     systemd_unit = f'/etc/systemd/system/gunicorn-{env.host}.service'
     sudo(
         f'cd {source_folder}'
-        ' && cp deploy_tools/gunicorn-systemd.template.service {systemd_unit}'
+        f' && cp deploy_tools/gunicorn-systemd.template.service {systemd_unit}'
     )
-    sed(systemd_unit, "__SITENAME__", env.host, use_sudo=True)
-    sed(systemd_unit, "__ROOT__", f'/home/{env.user}', use_sudo=True)
-    sed(systemd_unit, "__USER__", env.user, use_sudo=True)
-    sudo('systemd reload-daemon')
-    sudo(f'systemd start gunicorn-{env.host}.service')
+    sed(systemd_unit, "__SITENAME__", env.host, use_sudo=True, backup='')
+    sed(systemd_unit, "__ROOT__", f'/home/{env.user}', use_sudo=True, backup='')
+    sed(systemd_unit, "__USER__", env.user, use_sudo=True, backup='')
+    sudo('systemctl daemon-reload')
+    sudo(f'systemctl start gunicorn-{env.host}.service')
