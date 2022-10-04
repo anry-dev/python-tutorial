@@ -1,5 +1,5 @@
 from fabric.contrib.files import append, exists, sed
-from fabric.api import env, local, run
+from fabric.api import env, local, run, sudo
 import random
 
 REPO_URL = 'https://github.com/anry-dev/python-tutorial.git'
@@ -15,6 +15,8 @@ def deploy():
     _update_virtualenv(source_folder)
     _update_static_files(source_folder)
     _update_database(source_folder)
+    _update_nginx(source_folder)
+    _update_systemd(source_folder)
 
 def _create_directory_structure_if_necessary(site_folder):
     '''создать структуру каталога, если нужно'''
@@ -73,3 +75,29 @@ def _update_database(source_folder):
         f'cd {source_folder}'
         ' && ../virtualenv/bin/python manage.py migrate --noinput'
     )
+
+def _update_nginx(source_folder):
+    '''update nginx config'''
+
+    nginx_conf = f'/etc/nginx/sites-available/{env.host}.conf'
+    sudo(
+        f'cd {source_folder}'
+        f' && cp deploy_tools/nginx.template.conf {nginx_conf}'
+    )
+    sed(nginx_conf, "__SITENAME__", env.host, use_sudo=True)
+    sed(nginx_conf, "__ROOT__", f'/home/{env.user}', use_sudo=True)
+    sudo(f'ln -s {nginx_conf} /etc/nginx/sites-enabled')
+
+def _update_systemd(source_folder):
+    '''update systemd config'''
+
+    systemd_unit = f'/etc/systemd/system/gunicorn-{env.host}.service'
+    sudo(
+        f'cd {source_folder}'
+        ' && cp deploy_tools/gunicorn-systemd.template.service {systemd_unit}'
+    )
+    sed(systemd_unit, "__SITENAME__", env.host, use_sudo=True)
+    sed(systemd_unit, "__ROOT__", f'/home/{env.user}', use_sudo=True)
+    sed(systemd_unit, "__USER__", env.user, use_sudo=True)
+    sudo('systemd reload-daemon')
+    sudo(f'systemd start gunicorn-{env.host}.service')

@@ -1,12 +1,12 @@
 [Unit]
-Description=Gunicorn server for SITENAME
+Description=Gunicorn server for __SITENAME__
 
 [Service]
 Restart=on-failure
-User=USER
-WorkingDirectory=ROOT/sites/SITENAME/source
-ExecStart=ROOT/sites/SITENAME/virtualenv/bin/gunicorn \
-	--bind unix:/tmp/SITENAME.socket \
+User=__USER__
+WorkingDirectory=__ROOT__/sites/__SITENAME__/source
+ExecStart=__ROOT__/sites/__SITENAME__/virtualenv/bin/gunicorn \
+	--bind unix:/tmp/__SITENAME__.socket \
 	superlists.wsgi:application
 
 [Install]
