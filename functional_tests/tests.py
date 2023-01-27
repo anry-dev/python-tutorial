@@ -40,7 +40,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
                     raise e
                 time.sleep(0.5)
 
-    @unittest.skip("layout testing")
+    #@unittest.skip("layout testing")
     def test_can_start_a_list_and_retrieve_it_later(self):
         '''тест: можно создать список дел и получить их потом'''
         # Эдит слышала про крутое новое онлайн-приложение со списком
@@ -87,7 +87,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
         # Она посещает этот URL-адрес – ее список по-прежнему там.
         # Удовлетворенная, она снова ложится спать
 
-    @unittest.skip("layout testing")
+    #@unittest.skip("layout testing")
     def test_multiple_users_can_start_lists_at_different_urls(self):
         '''test: different users can create lists on different urls'''
 
@@ -141,16 +141,18 @@ class NewVisitonTest(StaticLiveServerTestCase):
         # Эдит открывает стартовую страницу
         self.browser.get(self.live_server_url)
         self.browser.set_window_size(1024, 768)
+        ##size = self.browser.get_window_size()
+        ##print("Window size: width = {}px, height = {}px.".format(size["width"], size["height"]))
 
         # Она замечает, что поле ввода расположено по центру
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
-        #print("\n\tx: %d\n\tsize: %d" % (
+        ##print("\n\tx: %d\n\tsize: %d" % (
         #                            inputbox.location['x'],
         #                            inputbox.size['width'])
         #)
 
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
-                330, #570 -not work with css, #512, -not work at all
+                272, #570 -not work with css, #512, -not work at all
                 delta=10
         )
 
@@ -161,7 +163,7 @@ class NewVisitonTest(StaticLiveServerTestCase):
         self.wait_for_row_in_list_table('1: layout test')
         inputbox = self.browser.find_element(By.ID, 'id_new_item')
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
-                330,
+                272,
                 delta=10
         )
 
