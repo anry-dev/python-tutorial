@@ -1,44 +1,14 @@
 #!/usr/bin/env python
 
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
+from .base import FunctionalTest
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import WebDriverException
-import time
 import unittest
-import os
 
-MAX_WAIT = 10
-
-class NewVisitonTest(StaticLiveServerTestCase):
+class NewVisitonTest(FunctionalTest):
     '''тест нового посетителя'''
-
-    def setUp(self):
-        '''setup'''
-        self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            print('Setting staging server to: %s' % (staging_server,))
-            self.live_server_url = 'http://' + staging_server
-
-    def tearDown(self):
-        '''shutdown'''
-        self.browser.quit()
-
-    def wait_for_row_in_list_table(self, row_text):
-        '''wait for a row to present in the list table'''
-        start_time = time.time()
-        while True:
-            try:
-                table = self.browser.find_element(By.ID, 'id_list_table')
-                rows = table.find_elements(By.TAG_NAME, 'tr')
-                self.assertIn(row_text, [row.text for row in rows])
-                return
-            except (AssertionError, WebDriverException) as e:
-                if time.time() - start_time > MAX_WAIT:
-                    raise e
-                time.sleep(0.5)
 
     #@unittest.skip("layout testing")
     def test_can_start_a_list_and_retrieve_it_later(self):
@@ -134,43 +104,3 @@ class NewVisitonTest(StaticLiveServerTestCase):
 
         # у Фрэнсис есть свое дело
         self.assertIn('1: Купить молоко', page_text)
-
-    def test_layout_and_styling(self):
-        '''test: page layout and styleing'''
-
-        # Эдит открывает стартовую страницу
-        self.browser.get(self.live_server_url)
-        self.browser.set_window_size(1024, 768)
-        ##size = self.browser.get_window_size()
-        ##print("Window size: width = {}px, height = {}px.".format(size["width"], size["height"]))
-
-        # Она замечает, что поле ввода расположено по центру
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
-        ##print("\n\tx: %d\n\tsize: %d" % (
-        #                            inputbox.location['x'],
-        #                            inputbox.size['width'])
-        #)
-
-        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
-                272, #570 -not work with css, #512, -not work at all
-                delta=10
-        )
-
-        # Она начинает новый список и замечает, что и там поле ввода
-        # расположено по центру
-        inputbox.send_keys('layout test')
-        inputbox.send_keys(Keys.ENTER)
-        self.wait_for_row_in_list_table('1: layout test')
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
-        self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
-                272,
-                delta=10
-        )
-
-    @unittest.skip("not ready yet")
-    def test_zzz_fail(self):
-        '''test: functional tests are not done yet!'''
-        self.fail('Закончить написание тестов!!!')
-
-#if __name__ == '__main__':
-#    unittest.main(warnings='ignore')
