@@ -20,7 +20,7 @@ class LayoutAndStylingTest(FunctionalTest):
         ##print("Window size: width = {}px, height = {}px.".format(size["width"], size["height"]))
 
         # Она замечает, что поле ввода расположено по центру
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         ##print("\n\tx: %d\n\tsize: %d" % (
         #                            inputbox.location['x'],
         #                            inputbox.size['width'])
@@ -36,7 +36,7 @@ class LayoutAndStylingTest(FunctionalTest):
         inputbox.send_keys('layout test')
         inputbox.send_keys(Keys.ENTER)
         self.wait_for_row_in_list_table('1: layout test')
-        inputbox = self.browser.find_element(By.ID, 'id_new_item')
+        inputbox = self.get_item_input_box()
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
                 272,
                 delta=10
