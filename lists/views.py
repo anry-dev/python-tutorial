@@ -13,6 +13,10 @@ def view_list(request, list_id):
     '''list view'''
 
     current_list = List.objects.get(id=list_id)
+    if request.method == 'POST':
+        Item.objects.create(text=request.POST['item_text'], list=current_list)
+        return redirect(f'/lists/{current_list.id}/')
+
     return render(request, 'list.html', {'list': current_list})
     #items = Item.objects.filter(list=current_list)
     #return render(request, 'list.html', {'items': items})
@@ -34,12 +38,3 @@ def new_list(request):
 
     return redirect('/')
 
-def add_item(request, list_id):
-    '''add item to the list'''
-
-    if request.method == 'POST':
-        current_list = List.objects.get(id=list_id)
-        Item.objects.create(text=request.POST['item_text'], list=current_list)
-        return redirect(f'/lists/{current_list.id}/')
-
-    return redirect('/')
