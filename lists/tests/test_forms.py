@@ -1,5 +1,5 @@
 from django.test import TestCase
-from lists.forms import ItemForm
+from lists.forms import EMPTY_ITEM_ERROR, ItemForm
 import unittest
 
 class ItemFormTest(TestCase):
@@ -16,3 +16,10 @@ class ItemFormTest(TestCase):
         form = ItemForm()
         self.assertIn('placeholder="Enter a to-do item"', form.as_p())
         self.assertIn('class="form-control input-lg"', form.as_p())
+
+    def test_form_validation_for_blank_items(self):
+        '''test: form validations against empty value'''
+        form = ItemForm(data={'text': ''})
+        #form.save()
+        self.assertFalse(form.is_valid())
+        self.assertEqual(form.errors['text'], [EMPTY_ITEM_ERROR])
