@@ -1,5 +1,6 @@
 from django.shortcuts import redirect, render
 from lists.models import Item, List
+from lists.forms import ItemForm
 from django.core.exceptions import ValidationError
 
 # Create your views here.
@@ -7,7 +8,7 @@ from django.core.exceptions import ValidationError
 def home_page(request):
     '''home page'''
 
-    return render(request, 'home.html')
+    return render(request, 'home.html', {'form': ItemForm()})
 
 def view_list(request, list_id):
     '''list view'''

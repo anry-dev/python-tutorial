@@ -3,6 +3,7 @@ from django.urls import resolve
 from lists.views import home_page
 from django.template.loader import render_to_string
 from lists.models import Item, List
+from lists.forms import ItemForm
 from django.utils.html import escape
 
 # Create your tests here.
@@ -21,6 +22,11 @@ class HomePageTest(TestCase):
         html = response.content.decode('utf8')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
+
+    def test_home_page_uses_item_form(self):
+        '''test: home page uses ItemForm for input'''
+        response = self.client.get('/')
+        self.assertIsInstance(response.context['form'], ItemForm)
 
 class ListViewTest(TestCase):
     '''List view tests'''
