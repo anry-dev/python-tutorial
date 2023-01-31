@@ -1,0 +1,2 @@
+- Delete hardcoded URLs from lists/view.py
+- Delete hardcoded URLs from lists/templates
