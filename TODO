@@ -1,3 +1,2 @@
 - Delete hardcoded URLs from lists/view.py
-- Delete hardcoded URLs from lists/templates
 - Delete double validation in list_view
