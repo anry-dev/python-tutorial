@@ -20,7 +20,7 @@ def view_list(request, list_id):
             item = Item.objects.create(text=request.POST['item_text'], list=list_)
             item.full_clean()
             item.save()
-            return redirect(f'/lists/{list_.id}/')
+            return redirect(list_)
         except ValidationError:
             item.delete()
             error = "You can't have an empty list item"
@@ -40,7 +40,7 @@ def new_list(request):
             new_list.delete()
             error = "You can't have an empty list item"
             return render(request, 'home.html', {'error': error})
-        return redirect(f'/lists/{new_list.id}/')
+        return redirect(new_list)
 
     return redirect('/')
 
