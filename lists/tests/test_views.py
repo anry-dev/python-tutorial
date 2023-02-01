@@ -3,7 +3,10 @@ from django.urls import resolve
 from lists.views import home_page
 from django.template.loader import render_to_string
 from lists.models import Item, List
-from lists.forms import ItemForm, EMPTY_ITEM_ERROR
+from lists.forms import (
+        ExistingListItemForm, ItemForm,
+        EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
+)
 from django.utils.html import escape
 import unittest
 
@@ -120,7 +123,7 @@ class ListViewTest(TestCase):
     def test_for_invalid_input_passes_form_to_template(self):
         '''test: invalid input still pass form object to template'''
         response = self.post_invalid_input()
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
     def test_for_invalid_input_shows_error_on_the_page(self):
         '''test: invalid input shows error on the page'''
@@ -131,10 +134,9 @@ class ListViewTest(TestCase):
         '''test: list view shows item form'''
         list_ = List.objects.create()
         response = self.client.get(f'/lists/{list_.id}/')
-        self.assertIsInstance(response.context['form'], ItemForm)
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
         self.assertContains(response, 'name="text"')
 
-    @unittest.skip
     def test_duplicate_item_validation_errors_end_up_on_lists_page(self):
         '''test: duplicate item validation error goes to lists page'''
         list_ = List.objects.create()
@@ -143,7 +145,7 @@ class ListViewTest(TestCase):
                 f'/lists/{list_.id}/',
                 data={'text': 'dup_test'}
         )
-        expected_error = escape("You've already got this item in your list")
+        expected_error = escape(DUPLICATE_ITEM_ERROR)
         self.assertContains(response, expected_error)
         self.assertTemplateUsed(response, 'list.html')
         self.assertEqual(Item.objects.all().count(), 1)
@@ -185,10 +187,19 @@ class NewListTest(TestCase):
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertContains(response, escape(EMPTY_ITEM_ERROR))
 
-    def test_for_invalid_input_passes_form_to_template(self):
-        '''test: invalid input sill pass form object to template'''
+    def test_for_invalid_input_to_new_list_passes_form_to_template(self):
+        '''test: invalid input for new list pass form object to template'''
         response = self.client.post('/lists/new', data={'text': ''})
         self.assertIsInstance(response.context['form'], ItemForm)
+
+    def test_for_invalid_input_to_existing_list_passes_form_to_template(self):
+        '''test: invalid input for existing list pass form object to template'''
+        list_ = List.objects.create()
+        response = self.client.post(
+                f'/lists/{list_.id}/',
+                data={'text': ''}
+        )
+        self.assertIsInstance(response.context['form'], ExistingListItemForm)
 
     def test_invalid_list_items_arent_saved(self):
         '''test: invalid items arent saved at all'''
