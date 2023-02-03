@@ -14,11 +14,13 @@ class TokenAuthenticationBackend(BaseBackend):
         logger.debug(f'auth called: {uid}')
         try:
             token = Token.objects.get(uid=uid)
-            return User.objects.get(email=token.email)
+            email = token.email
+            token.delete()
+            return User.objects.get(email=email)
         except Token.DoesNotExist:
             return None
         except User.DoesNotExist:
-            return User.objects.create(email=token.email)
+            return User.objects.create(email=email)
 
     def get_user(self, email):
         '''find correct user by email'''

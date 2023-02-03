@@ -48,6 +48,14 @@ class DirectAuthenticationTest(TestCase):
         user = TokenAuthenticationBackend().get_user(email)
         self.assertIsNone(user)
 
+    def test_token_is_one_time_auth(self):
+        '''test: token works only one time'''
+        email = 'one-time-test@a.bc'
+        token = Token.objects.create(email=email)
+        user = TokenAuthenticationBackend().authenticate(uid=token.uid)
+        user = TokenAuthenticationBackend().authenticate(uid=token.uid)
+        self.assertIsNone(user)
+
 class DjangoAuthenticationTest(TestCase):
     '''testing django calls to authentication backend'''
 

@@ -136,12 +136,11 @@ class SendLoginEmailViewTest(TestCase):
 class LoginViewTest(TestCase):
     '''testing login view'''
 
-    url_name = 'accounts_login'
+    url_name = 'login'
     url = reverse(url_name)
 
     def test_login_page_redirects_to_home_page(self, mock_auth):
         '''test: request to login page is redirected to home page'''
-        #print(reverse('accounts_login')) #, args=('/login?token=abcd123',)))
         response = self.client.get(f'{self.url}?token=abcd123')
         self.assertRedirects(response, '/')
 

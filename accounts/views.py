@@ -15,7 +15,7 @@ def send_login_email(request):
         email = request.POST['email']
         token = Token.objects.create(email=email)
         url = request.build_absolute_uri(
-                reverse('accounts_login') + f'?token={token.uid}'
+                reverse('login') + f'?token={token.uid}'
         )
         logger.debug(f'login url: {url}')
         body = f'Use this link to log in:\n\n{url}'
@@ -40,3 +40,11 @@ def login(request):
         auth.login(request, user)
 
     return redirect('/')
+
+def logout(request, **kwargs):
+    '''logout user'''
+    logger.debug('logout called')
+    #for key, val in kwargs.items():
+    #    logger.debug(f'\tkwargs: {key}\t{val}')
+    auth.logout(request)
+    return redirect(kwargs['next_page'])

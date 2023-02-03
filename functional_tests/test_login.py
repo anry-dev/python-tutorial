@@ -1,6 +1,7 @@
 from django.core import mail
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 import re
 
 from .base import FunctionalTest
@@ -55,7 +56,16 @@ class LoginTest(FunctionalTest):
                 lambda: self.browser.find_element(By.LINK_TEXT, 'Log out')
         )
 
-        self.assertIn(
-                TEST_EMAIL,
-                self.browser.find_element(By.CSS_SELECTOR, '.navbar').text
-        )
+        # И видит свой email
+        navbar = self.browser.find_element(By.CSS_SELECTOR, '.navbar')
+        self.assertIn(TEST_EMAIL, navbar.text)
+
+        # После чего она пытается выйти из системы
+        self.browser.find_element(By.LINK_TEXT, 'Log out').click()
+
+        # И проверяет, что она действительно вышла из системы
+        with self.assertRaises(NoSuchElementException):
+            self.browser.find_element(By.LINK_TEXT, 'Log out')
+
+        navbar = self.browser.find_element(By.CSS_SELECTOR, '.navbar')
+        self.assertNotIn(TEST_EMAIL, navbar.text)
