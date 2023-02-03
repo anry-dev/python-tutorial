@@ -17,10 +17,10 @@ class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
         '''setup'''
         self.browser = webdriver.Firefox()
-        staging_server = os.environ.get('STAGING_SERVER')
-        if staging_server:
-            print('Setting staging server to: %s' % (staging_server,))
-            self.live_server_url = 'http://' + staging_server
+        self.staging_server = os.environ.get('STAGING_SERVER')
+        if self.staging_server:
+            print('Setting staging server to: %s' % (self.staging_server,))
+            self.live_server_url = 'http://' + self.staging_server
 
     def tearDown(self):
         '''shutdown'''

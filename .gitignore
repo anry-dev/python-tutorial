@@ -3,3 +3,4 @@ geckodriver.log
 *.pyc
 .secret_key
 .emailpass
+.poppass
