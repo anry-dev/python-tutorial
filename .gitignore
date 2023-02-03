@@ -2,3 +2,4 @@ db.sqlite3
 geckodriver.log
 *.pyc
 .secret_key
+.emailpass

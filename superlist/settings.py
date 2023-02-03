@@ -49,6 +49,12 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'lists',
+    'accounts',
+]
+
+AUTH_USER_MODEL = 'accounts.User'
+AUTHENTICATION_BACKENDS = [
+    'accounts.authentication.TokenAuthenticationBackend',
 ]
 
 MIDDLEWARE = [
@@ -147,8 +153,36 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+    #'root': {
+    #    'handlers': ['console'],
+    #    'level':  'INFO',
+    #},
+    'loggers': {
+        'functional_tests.test_login': {
+            'handlers': ['console'],
+            'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'accounts.views': {
+            'handlers': ['console'],
+            'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
+        'accounts.authentication': {
+            'handlers': ['console'],
+            'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+        },
     },
 }
+
+# email section for accounts app
+EMAIL_HOST = 'mail.lab.rt.ru'
+EMAIL_HOST_USER = 'anry@lab.rt.ru'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+_email_password = Path('.emailpass')
+if _email_password.is_file():
+    with _email_password.open() as f:
+        EMAIL_HOST_PASSWORD = f.read().strip()
+        f.close()
+else:
+    EMAIL_HOST_PASSWORD = ''
+

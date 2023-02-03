@@ -8,6 +8,10 @@ from .base import FunctionalTest
 TEST_EMAIL = 'supertlist@lab.rt.ru'
 SUBJECT = 'Your login link for Superlists'
 
+import logging
+logger = logging.getLogger(__name__)
+logger.debug(f'module: {__name__}')
+
 class LoginTest(FunctionalTest):
     '''test form user registrations'''
 
@@ -23,7 +27,7 @@ class LoginTest(FunctionalTest):
 
         # появляется сообщение, что письмо отправлено
         self.wait_for(lambda: self.assertIn(
-            'Login link is sent to your email address',
+            'Check your mail',
             self.browser.find_element(By.TAG_NAME, 'body').text
         ))
 
@@ -31,7 +35,6 @@ class LoginTest(FunctionalTest):
         # И находит сообщение с правильным заголовком
         email = mail.outbox[0]      # test feature !!!
         self.assertIn(TEST_EMAIL, email.to)
-        print(f'subject: {email.subject}')
         self.assertEqual(SUBJECT, email.subject)
 
         # Письмо содержит ссылку для логина
@@ -42,6 +45,7 @@ class LoginTest(FunctionalTest):
 
         url = url_search.group(0)
         self.assertIn(self.live_server_url, url)
+        logger.debug(f'Got url: {url}')
 
         # Этит переходит по ссылке
         self.browser.get(url)
