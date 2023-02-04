@@ -114,4 +114,4 @@ def _update_systemd(source_folder):
     sed(systemd_unit, "__ROOT__", f'/home/{env.user}', use_sudo=True, backup='')
     sed(systemd_unit, "__USER__", env.user, use_sudo=True, backup='')
     sudo('systemctl daemon-reload')
-    sudo(f'systemctl start gunicorn-{env.host}.service')
+    sudo(f'systemctl restart gunicorn-{env.host}.service')

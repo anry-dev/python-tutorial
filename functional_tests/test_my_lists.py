@@ -5,6 +5,9 @@ from .base import FunctionalTest
 from .server_tools import create_session_on_server
 from .management.commands.create_session import create_pre_authenticated_session
 
+import logging
+logger = logging.getLogger(__name__)
+
 User = get_user_model()
 
 class MyListsTest(FunctionalTest):
@@ -16,6 +19,8 @@ class MyListsTest(FunctionalTest):
             session_key = create_session_on_server(self.staging_server, email)
         else:
             session_key = create_pre_authenticated_session(email)
+
+        logger.debug(f'pre-auth session key: {session_key}')
 
         # set cookies for the browser
         # page 404 loads faster then other

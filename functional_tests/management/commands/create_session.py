@@ -1,9 +1,8 @@
 from django.conf import settings
-from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
+from django.contrib import auth
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.management.base import BaseCommand
 
-User = get_user_model()
 
 class Command(BaseCommand):
     '''command runner'''
@@ -19,10 +18,14 @@ class Command(BaseCommand):
 
 def create_pre_authenticated_session(email):
     '''create pre-authenticated session on the server'''
+    '''src: https://gist.github.com/dbrgn/bae5329e17d2801a041e'''
+    User = auth.get_user_model()
     user = User.objects.create(email=email)
-    session = SessionStore()
-    session[SESSION_KEY] = user.pk
-    session[BACKEND_SESSION_KEY] = settings.AUTHENTICATION_BACKENDS[0]
+    session = SessionStore(None)
+    session.clear()
+    session.cycle_key()
+    session[auth.SESSION_KEY] = user._meta.pk.value_to_string(user)
+    session[auth.BACKEND_SESSION_KEY] = 'django.contrib.auth.backends.ModelBackend'
+    #session[auth.HASH_SESSION_KEY] = user.get_session_auth_hash()
     session.save()
     return session.session_key
-

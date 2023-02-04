@@ -159,9 +159,9 @@ LOGGING = {
     #    'level':  'INFO',
     #},
     'loggers': {
-        'functional_tests.test_login': {
+        'functional_tests': {
             'handlers': ['console'],
-            'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level': 'DEBUG',
         },
         'accounts.views': {
             'handlers': ['console'],
