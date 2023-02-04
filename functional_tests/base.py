@@ -8,6 +8,7 @@ from selenium.common.exceptions import WebDriverException
 import time
 import unittest
 import os
+from .server_tools import reset_database
 
 MAX_WAIT = 10
 
@@ -21,6 +22,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         if self.staging_server:
             print('Setting staging server to: %s' % (self.staging_server,))
             self.live_server_url = 'http://' + self.staging_server
+            reset_database(self.staging_server)
 
     def tearDown(self):
         '''shutdown'''
