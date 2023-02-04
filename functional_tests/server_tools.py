@@ -20,6 +20,5 @@ def create_session_on_server(host, email):
     manage_dot_py = _get_manage_dot_py(host)
     with settings(host_string=f'{host}'):
         session_key = run(f'{manage_dot_py} create_session {email}')
-        logger.debug(f'session_key.strip: {session_key.strip()}')
-        logger.debug(f'session_key.rstrip: {session_key.rstrip()}')
+        logger.debug(f'session_key.strip: "{session_key.strip()}"')
         return session_key.strip()
