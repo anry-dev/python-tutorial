@@ -151,23 +151,24 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
         },
     },
-    #'root': {
-    #    'handlers': ['console'],
-    #    'level':  'INFO',
-    #},
+    'root': {
+        'handlers': ['console'],
+        'level':  'INFO',
+    },
     'loggers': {
         'functional_tests': {
             'handlers': ['console'],
-            'level': 'DEBUG',
+            'level':  os.getenv('MY_LOG_LEVEL', 'INFO'),
         },
         'accounts.views': {
             'handlers': ['console'],
-            'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
+            'level':  os.getenv('MY_LOG_LEVEL', 'INFO'),
         },
-        'accounts.authentication': {
+        'django': {
             'handlers': ['console'],
             'level':  os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
         },
@@ -185,5 +186,5 @@ if _email_password.is_file():
         EMAIL_HOST_PASSWORD = f.read().strip()
         f.close()
 else:
-    EMAIL_HOST_PASSWORD = ''
+    EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', ''),
 
