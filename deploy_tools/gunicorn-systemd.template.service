@@ -1,12 +1,16 @@
 [Unit]
-Description=Gunicorn server for __SITENAME__
+Description=Gunicorn server for __SITENAME__ by __USER__
 
 [Service]
 Restart=on-failure
 User=__USER__
+Environment=MY_LOG_LEVEL=DEBUG
 WorkingDirectory=__ROOT__/sites/__SITENAME__/source
 ExecStart=__ROOT__/sites/__SITENAME__/virtualenv/bin/gunicorn \
 	--bind unix:/tmp/__SITENAME__.socket \
+	--capture-output \
+	--access-logfile ../access.log \
+	--error-logfile ../error.log \
 	superlist.wsgi:application
 
 [Install]
