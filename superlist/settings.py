@@ -155,10 +155,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
         },
     },
-    'root': {
-        'handlers': ['console'],
-        'level':  'INFO',
-    },
+#    'root': {
+#        'handlers': ['console'],
+#        'level':  'INFO',
+#    },
     'loggers': {
         'functional_tests': {
             'handlers': ['console'],
