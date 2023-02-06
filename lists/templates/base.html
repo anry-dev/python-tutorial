@@ -15,7 +15,7 @@
 	      <div class="container-ﬂuid">
 		    -->
 		<a class="navbar-brand" href="/">Superlists</a>
-		{% if user.email %}
+		{% if user.is_authenticated and user.email %}
 		  <ul class="nav navbar-nav navbar-right">
 		    <li class="navbar-text">Logged in as {{ user.email }}</li>
 		    <li><a href="{% url 'logout' %}">Log out</a></li>
