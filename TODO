@@ -1,1 +1,1 @@
-- fix wait_for in functional_tests
+- make send_mail parameters config via variables
