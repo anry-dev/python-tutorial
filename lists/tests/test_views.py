@@ -9,8 +9,9 @@ from lists.forms import (
 )
 from django.utils.html import escape
 import unittest
-from django.contrib import auth
+from unittest.mock import patch
 
+from django.contrib import auth
 User = auth.get_user_model()
 
 # Create your tests here.
@@ -233,13 +234,25 @@ class UserListsTest(TestCase):
         response = self.client.get(reverse('user_lists', args=[email]))
         self.assertEqual(response.context['owner'], correct_user)
 
-    def test_list_owner_is_saved_if_user_is_authenticated(self):
+    @patch('lists.views.List')
+    @patch('lists.views.ItemForm')
+    def test_list_owner_is_saved_if_user_is_authenticated(
+            self,
+            mockItemFormClass,
+            mockListClass
+    ):
         '''test: list owner is saved for authenticated users'''
         email = 'correct@user.com'
         user = User.objects.create(email=email)
         self.client.force_login(user)
-        response = self.client.post(reverse('new_list'), data={'text': 'A new list item'})
-        list_ = List.objects.first()
-        self.assertEqual(list_.owner, user)
+        mock_list = mockListClass.return_value
+        def check_owner_assigned():
+            '''check that owner is aassigned before save'''
+            self.assertEqual(mock_list.owner, user)
+        mock_list.save.side_effect = check_owner_assigned
+
+        self.client.post(reverse('new_list'), data={'text': 'A new list item'})
+
+        self.assertEqual(mock_list.owner, user)
 
 

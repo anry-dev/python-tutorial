@@ -164,7 +164,7 @@ LOGGING = {
             'handlers': ['console'],
             'level':  os.getenv('MY_LOG_LEVEL', 'INFO'),
         },
-        'accounts.views': {
+        'lists': {
             'handlers': ['console'],
             'level':  os.getenv('MY_LOG_LEVEL', 'INFO'),
         },
