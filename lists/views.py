@@ -38,3 +38,8 @@ def new_list(request):
 
     return redirect('/')
 
+def user_lists(request, email):
+    '''per-user lists view'''
+
+    return render(request, 'user_lists.html')
+

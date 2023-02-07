@@ -1,5 +1,5 @@
 from django.test import TestCase
-from django.urls import resolve
+from django.urls import resolve, reverse
 from lists.views import home_page
 from django.template.loader import render_to_string
 from lists.models import Item, List
@@ -9,6 +9,7 @@ from lists.forms import (
 )
 from django.utils.html import escape
 import unittest
+
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -210,5 +211,12 @@ class NewListTest(TestCase):
 
 class NewListItemTest(TestCase):
     '''test adding item to existing list'''
+    pass
 
 
+class UserListsTest(TestCase):
+    '''test for user's own lists'''
+
+    def test_user_lists_url_renders_user_lists_template(self):
+        response = self.client.get(reverse('user_lists', args=['a@b.c']))
+        self.assertTemplateUsed(response, 'user_lists.html')

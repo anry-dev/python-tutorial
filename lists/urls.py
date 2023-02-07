@@ -5,4 +5,5 @@ urlpatterns = [
     re_path(r'^$', views.home_page, name='home'),
     re_path(r'^new$', views.new_list, name='new_list'),
     re_path(r'^(\d+)/$', views.view_list, name='view_list'),
+    re_path(r'user/(.+)/$', views.user_lists, name='user_lists'),
 ]
