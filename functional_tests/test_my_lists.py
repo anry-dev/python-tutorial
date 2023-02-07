@@ -2,8 +2,9 @@ from django.conf import settings
 from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
 from django.contrib.sessions.backends.db import SessionStore
 from .base import FunctionalTest
-from .server_tools import create_session_on_server
+from .server_tools import create_session_on_server, create_token_on_server
 from .management.commands.create_session import create_pre_authenticated_session
+from .management.commands.create_token import create_auth_token
 
 import logging
 logger = logging.getLogger(__name__)
@@ -13,14 +14,23 @@ User = get_user_model()
 class MyListsTest(FunctionalTest):
     '''test users own todo lists'''
 
-    def create_pre_authenticated_session(self, email):
+    def create_pre_authenticated_session_by_token(self, email):
+        '''make web sessions authenticated on the server'''
+        if self.staging_server:
+            token = create_token_on_server(self.staging_server, email)
+            #self.browser.get(url)
+        else:
+            token = create_auth_token(email)
+
+        url = f'{self.live_server_url}/accounts/login?token={token}'
+        self.browser.get(url)
+
+    def create_pre_authenticated_session_by_session(self, email):
         '''make web sessions authenticated on the server'''
         if self.staging_server:
             session_key = create_session_on_server(self.staging_server, email)
         else:
             session_key = create_pre_authenticated_session(email)
-
-        logger.debug(f'pre-auth session key: {session_key}')
 
         # set cookies for the browser
         # page 404 loads faster then other
@@ -39,6 +49,7 @@ class MyListsTest(FunctionalTest):
 
         # Эдит является зарегистриованным пользователем
         # она подключается к системе и видит свои списки
-        self.create_pre_authenticated_session(email)
+        ##self.create_pre_authenticated_session_by_token(email) # works OK
+        self.create_pre_authenticated_session_by_session(email)
         self.browser.get(self.live_server_url)
         self.wait_to_be_logged_in(email)
