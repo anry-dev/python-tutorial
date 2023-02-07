@@ -9,7 +9,9 @@ from lists.forms import (
 )
 from django.utils.html import escape
 import unittest
+from django.contrib import auth
 
+User = auth.get_user_model()
 
 # Create your tests here.
 class HomePageTest(TestCase):
@@ -218,5 +220,26 @@ class UserListsTest(TestCase):
     '''test for user's own lists'''
 
     def test_user_lists_url_renders_user_lists_template(self):
+        '''test: use correct template'''
+        User.objects.create(email='a@b.c')
         response = self.client.get(reverse('user_lists', args=['a@b.c']))
         self.assertTemplateUsed(response, 'user_lists.html')
+
+    def test_passes_correct_owner_to_template(self):
+        '''test: we pass correct owner to render'''
+        User.objects.create(email='some@user')
+        email = 'correct@user.com'
+        correct_user = User.objects.create(email=email)
+        response = self.client.get(reverse('user_lists', args=[email]))
+        self.assertEqual(response.context['owner'], correct_user)
+
+    def test_list_owner_is_saved_if_user_is_authenticated(self):
+        '''test: list owner is saved for authenticated users'''
+        email = 'correct@user.com'
+        user = User.objects.create(email=email)
+        self.client.force_login(user)
+        response = self.client.post(reverse('new_list'), data={'text': 'A new list item'})
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, user)
+
+

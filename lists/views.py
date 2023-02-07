@@ -2,6 +2,9 @@ from django.shortcuts import redirect, render
 from lists.models import Item, List
 from lists.forms import ItemForm, ExistingListItemForm
 from django.core.exceptions import ValidationError
+from django.contrib import auth
+
+User = auth.get_user_model()
 
 # Create your views here.
 
@@ -31,6 +34,7 @@ def new_list(request):
         form = ItemForm(data=request.POST)
         if form.is_valid():
             list_ = List.objects.create()
+            list_.owner = request.user
             form.save(for_list=list_)
             return redirect(list_)
         else:
@@ -41,5 +45,7 @@ def new_list(request):
 def user_lists(request, email):
     '''per-user lists view'''
 
-    return render(request, 'user_lists.html')
+    owner = User.objects.get(email=email)
+
+    return render(request, 'user_lists.html', {'owner': owner,})
 

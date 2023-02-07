@@ -4,7 +4,7 @@ from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import WebDriverException, NoSuchElementException
 import time
 import unittest
 import os
@@ -81,6 +81,13 @@ class FunctionalTest(StaticLiveServerTestCase):
     def get_item_input_box(self):
         '''return input field for the form'''
         return self.browser.find_element(By.ID, 'id_text')
+
+    def add_list_item(self, item_text):
+        '''add new list item'''
+        num_rows = len(self.browser.find_elements(By.CSS_SELECTOR, '#id_list_table tr'))
+        self.get_item_input_box().send_keys(item_text)
+        self.get_item_input_box().send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table(f'{num_rows + 1}: {item_text}')
 
     @wait
     def wait_to_be_logged_in(self, email):
