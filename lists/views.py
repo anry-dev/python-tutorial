@@ -2,8 +2,11 @@ from django.shortcuts import redirect, render
 from lists.models import Item, List
 from lists.forms import ItemForm, ExistingListItemForm
 from django.core.exceptions import ValidationError
-from django.contrib import auth
 
+import logging
+logger = logging.getLogger(__name__)
+
+from django.contrib import auth
 User = auth.get_user_model()
 
 # Create your views here.
@@ -33,8 +36,10 @@ def new_list(request):
     if request.method == 'POST':
         form = ItemForm(data=request.POST)
         if form.is_valid():
-            list_ = List.objects.create()
-            list_.owner = request.user
+            list_ = List()
+            if request.user.is_authenticated:
+                list_.owner = request.user
+            list_.save()
             form.save(for_list=list_)
             return redirect(list_)
         else:

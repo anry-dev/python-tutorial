@@ -2,6 +2,9 @@ from django.test import TestCase
 from lists.models import Item, List
 from django.core.exceptions import ValidationError
 from django.urls import reverse
+from django.contrib import auth
+
+User = auth.get_user_model()
 
 class ItemModelTest(TestCase):
     '''Item elements model tests'''
@@ -99,3 +102,12 @@ class ListModelTest(TestCase):
         self.assertEqual(list_.get_absolute_url(),
                         reverse('view_list', args=[list_.id]))
 
+    def test_list_owner_is_optional(self):
+        '''test: list can have no owner'''
+        list_ = List.objects.create()
+
+    def test_lists_can_have_owners(self):
+        '''test: lists have onwers and users have thier lists'''
+        user = User.objects.create(email='test@abc')
+        list_ = List.objects.create(owner=user)
+        self.assertIn(list_, user.list_set.all())
