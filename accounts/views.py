@@ -6,7 +6,6 @@ from accounts.models import Token
 
 import logging
 logger = logging.getLogger(__name__)
-logger.debug(f'views module: {__name__}')
 
 # Create your views here.
 def send_login_email(request):
