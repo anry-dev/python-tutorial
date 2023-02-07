@@ -7,8 +7,9 @@ logger = logging.getLogger(__name__)
 def _get_manage_dot_py(host):
     '''return command line to run manage.py for the site'''
     # doesn't work on remote host with sessions - Sesstion data corrupt
-    #return f'~/sites/{host}/virtualenv/bin/python ~/sites/{host}/source/manage.py'
-    return f'cd ~/sites/{host}/source && ~/sites/{host}/virtualenv/bin/python ~/sites/{host}/source/manage.py'
+    # because of _email_password was relative path
+    return f'~/sites/{host}/virtualenv/bin/python ~/sites/{host}/source/manage.py'
+    #return f'cd ~/sites/{host}/source && ~/sites/{host}/virtualenv/bin/python ~/sites/{host}/source/manage.py'
 
 def reset_database(host):
     '''reset database on remote host'''

@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 #SECRET_KEY = 'django-insecure-e_l@169l!e-d^fdt752rk3l!yh)r(wx1w)vs&3pz01=51lfs9a'
-_secret_key_file = Path('.secret_key')
+_secret_key_file = Path(f'{BASE_DIR}/.secret_key')
 if _secret_key_file.is_file():
     with _secret_key_file.open() as f:
         SECRET_KEY = f.read().strip()
@@ -180,7 +180,7 @@ EMAIL_HOST = 'mail.lab.rt.ru'
 EMAIL_HOST_USER = 'anry@lab.rt.ru'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-_email_password = Path('.emailpass')
+_email_password = Path(f'{BASE_DIR}/.emailpass')
 if _email_password.is_file():
     with _email_password.open() as f:
         EMAIL_HOST_PASSWORD = f.read().strip()
