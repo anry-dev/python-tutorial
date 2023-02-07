@@ -2,6 +2,7 @@ from django.conf import settings
 from django.contrib.auth import BACKEND_SESSION_KEY, SESSION_KEY, get_user_model
 from django.contrib.sessions.backends.db import SessionStore
 from selenium.webdriver.common.by import By
+from selenium.common.exceptions import NoSuchElementException
 from .base import FunctionalTest
 from .server_tools import create_session_on_server, create_token_on_server
 from .management.commands.create_session import create_pre_authenticated_session
@@ -61,7 +62,7 @@ class MyListsTest(FunctionalTest):
 
         # И видит там свой список дел, названный по первому пункту
         self.wait_for(
-            self.browser.find_element(By.LINK_TEXT, 'Снять шторы')
+            lambda: self.browser.find_element(By.LINK_TEXT, 'Снять шторы')
         )
 
         # Кликает в него и попадает на страничку своего списка дел
@@ -81,7 +82,7 @@ class MyListsTest(FunctionalTest):
         # И проверяет, что новый список отображается в "My lists"
         self.browser.find_element(By.LINK_TEXT, 'My lists').click()
         self.wait_for(
-            self.browser.find_element(By.LINK_TEXT, 'Подмести пол')
+            lambda: self.browser.find_element(By.LINK_TEXT, 'Подмести пол')
         )
         self.browser.find_element(By.LINK_TEXT, 'Подмести пол').click()
         self.wait_for(
@@ -90,9 +91,11 @@ class MyListsTest(FunctionalTest):
 
         # Она выходит из системы и опция "My lists" пропадает
         self.browser.find_element(By.LINK_TEXT, 'Log out').click()
+        # selenium.common.exceptions.NoSuchElementException
+        #with self.assertRaises(NoSuchElementException):
         self.wait_for(
             lambda: self.assertEqual(
-                self.browser.find_element(By.LINK_TEXT, 'My lists'),
+                self.browser.find_elements(By.LINK_TEXT, 'My lists'),
                 []
             )
         )

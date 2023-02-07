@@ -42,8 +42,5 @@ def login(request):
 
 def logout(request, **kwargs):
     '''logout user'''
-    logger.debug('logout called')
-    #for key, val in kwargs.items():
-    #    logger.debug(f'\tkwargs: {key}\t{val}')
     auth.logout(request)
     return redirect(kwargs['next_page'])

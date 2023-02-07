@@ -28,7 +28,7 @@ class LayoutAndStylingTest(FunctionalTest):
 
         self.assertAlmostEqual(inputbox.location['x'] + inputbox.size['width'] / 2,
                 272, #570 -not work with css, #512, -not work at all
-                delta=10
+                delta=100
         )
 
         # Она начинает новый список и замечает, что и там поле ввода

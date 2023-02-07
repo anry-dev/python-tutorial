@@ -12,6 +12,11 @@ class List(models.Model):
         '''return absolute url for the object'''
         return reverse('view_list', args=[self.id])
 
+    @property
+    def name(self):
+        '''returns list name'''
+        return self.item_set.first().text
+
 class Item(models.Model):
     '''To-Do list element'''
 
