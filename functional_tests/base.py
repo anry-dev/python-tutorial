@@ -10,6 +10,14 @@ import unittest
 import os
 from .server_tools import reset_database
 
+# screen dumps config
+from datetime import datetime
+from pathlib import Path
+
+# Path(__file__) - full path to base.py
+SCREEN_DUMP_LOCATION = Path(__file__).resolve().parent.joinpath('screendumps')
+#SCREEN_DUMP_LOCATION = Path(__file__).resolve().parent.parent.parent.joinpath('screendumps')
+
 MAX_WAIT = 10
 
 class FunctionalTest(StaticLiveServerTestCase):
@@ -26,7 +34,47 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def tearDown(self):
         '''shutdown'''
+        if self._test_has_failed():
+            if not SCREEN_DUMP_LOCATION.exists():
+                SCREEN_DUMP_LOCATION.mkdir()
+            for ix, handle in enumerate(self.browser.window_handles):
+                self._windowid = ix
+                self.browser.switch_to.window(handle)
+                self.take_screenshot()
+                self.dump_html()
+
         self.browser.quit()
+        super().tearDown()
+
+    def _test_has_failed(self):
+        '''check that test has failed'''
+        # uhh
+        return any(error for (method, error) in self._outcome.errors)
+
+    def _get_filename(self):
+        '''make filename for data saving'''
+        timestamp = datetime.now().isoformat().replace(':', '.')[:19]
+        return '{folder}/{classname}.{method}-window{windowid}-{timestamp}'.\
+            format(
+                folder=str(SCREEN_DUMP_LOCATION),
+                classname=self.__class__.__name__,
+                method=self._testMethodName,
+                windowid=self._windowid,
+                timestamp=timestamp,
+            )
+
+    def take_screenshot(self):
+        '''save current window screenshot to SCREEN_DUMP_LOCATION'''
+        filename = self._get_filename() + '.png'
+        print(f'screenshotting to {filename}')
+        self.browser.get_screenshot_as_file(filename)
+
+    def dump_html(self):
+        '''save current page source to SCREEN_DUMP_LOCATION'''
+        filename = self._get_filename() + '.html'
+        print(f'dumping page HTML to {filename}')
+        with open(filename, 'w') as f:
+            f.write(self.browser.page_source)
 
     def wait_for_row_in_list_table(self, row_text):
         '''wait for a row to present in the list table'''

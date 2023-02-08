@@ -4,3 +4,4 @@ geckodriver.log
 .secret_key
 .emailpass
 .poppass
+functional_tests/screendumps
