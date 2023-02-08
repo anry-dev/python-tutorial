@@ -30,7 +30,7 @@ def view_list(request, list_id):
 
     return render(request, 'list.html', {'list': list_, 'form': form})
 
-def new_list2(request):
+def new_list(request):
     '''new list - version 2'''
 
     form = NewListForm(data=request.POST)
@@ -39,23 +39,6 @@ def new_list2(request):
         return redirect(str(list_.get_absolute_url()))
 
     return render(request, 'home.html', {'form': form})
-
-def new_list(request):
-    '''new list'''
-
-    if request.method == 'POST':
-        form = ItemForm(data=request.POST)
-        if form.is_valid():
-            list_ = List()
-            if request.user.is_authenticated:
-                list_.owner = request.user
-            list_.save()
-            form.save(for_list=list_)
-            return redirect(str(list_.get_absolute_url()))
-        else:
-            return render(request, 'home.html', {'form': form})
-
-    return redirect('/')
 
 def user_lists(request, email):
     '''per-user lists view'''
