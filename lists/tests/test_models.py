@@ -3,6 +3,9 @@ from lists.models import Item, List
 from django.core.exceptions import ValidationError
 from django.urls import reverse
 
+from django.contrib import auth
+User = auth.get_user_model()
+
 class ItemModelTest(TestCase):
     '''Item elements model tests'''
 
@@ -99,3 +102,39 @@ class ListModelTest(TestCase):
         self.assertEqual(list_.get_absolute_url(),
                         reverse('view_list', args=[list_.id]))
 
+    def test_lists_can_have_owners(self):
+        '''test: List objects can have owner'''
+        List(owner=User())
+
+    def test_list_owner_is_optional(self):
+        '''test: owner is optional for a List object'''
+        List().full_clean()
+
+    def test_create_new_creates_new_list_and_item(self):
+        '''test List.create_new creates new list and item with text'''
+        List.create_new(item_text='new list item')
+        new_item = Item.objects.first()
+        self.assertEqual(new_item.text, 'new list item')
+        new_list = List.objects.first()
+        self.assertEqual(new_item.list, new_list)
+
+    def test_create_new_optionally_saves_owner(self):
+        '''test List.create_new can save list owner'''
+        user = User.objects.create(email='test@abc')
+        List.create_new(item_text='new owners item', owner=user)
+        new_list = List.objects.first()
+        self.assertEqual(new_list.owner, user)
+
+    def test_create_new_returns_list_object(self):
+        '''test: create_new return a new list object'''
+        ret = List.create_new(item_text='new list object test')
+        new_list = List.objects.first()
+        self.assertEqual(ret, new_list)
+
+
+    def test_list_name_is_first_item_text(self):
+        '''test: list.name is the first list's item text'''
+        list_ = List.objects.create()
+        Item.objects.create(text='first item', list=list_)
+        Item.objects.create(text='second item', list=list_)
+        self.assertEqual(list_.name, 'first item')

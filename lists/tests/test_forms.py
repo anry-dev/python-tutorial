@@ -70,6 +70,7 @@ class ExistingListItemFormTest(TestCase):
 class NewListFormTest(unittest.TestCase):
     '''NewListForm tests'''
 
+    @unittest.skip('realisation changed')
     @patch('lists.forms.List')
     @patch('lists.forms.Item')
     def test_save_creates_new_list_and_item_from_POST_data(
@@ -95,3 +96,44 @@ class NewListFormTest(unittest.TestCase):
         form.save(owner=user)
 
         self.assertTrue(mock_item.save.called)
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_from_post_data_if_user_not_authenticated(
+        self,
+        mock_List_create_new
+    ):
+        '''test: NewListForm.save users List.create_new for not authenticated users'''
+        user = Mock(is_authenticated=False)
+        form = NewListForm(data={'text': 'new item text unauth'})
+        form.is_valid()
+        form.save(owner=user)
+        mock_List_create_new.assert_called_once_with(
+            item_text = 'new item text unauth'
+        )
+
+    @patch('lists.forms.List.create_new')
+    def test_save_creates_new_list_from_post_data_if_user_is_authenticated(
+        self,
+        mock_List_create_new
+    ):
+        '''test: NewListForm.save users List.create_new for not authenticated users'''
+        user = Mock(is_authenticated=True)
+        form = NewListForm(data={'text': 'new item text auth'})
+        form.is_valid()
+        form.save(owner=user)
+        mock_List_create_new.assert_called_once_with(
+            item_text = 'new item text auth',
+            owner = user
+        )
+
+    @patch('lists.forms.List.create_new')
+    def test_save_returns_new_list_object(
+        self,
+        mock_List_create_new
+    ):
+        '''test: form.save returns new list object'''
+        user = Mock(is_authenticated=True)
+        form = NewListForm(data={'text': 'new save test'})
+        form.is_valid()
+        ret = form.save(owner=user)
+        self.assertEqual(ret, mock_List_create_new.return_value)

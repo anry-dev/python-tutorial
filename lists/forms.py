@@ -47,7 +47,7 @@ class ExistingListItemForm(ItemForm):
 class NewListForm(ItemForm):
     '''Form for the new list - v2'''
 
-    def save(self, owner):
+    def save_pre_1(self, owner):
         '''save form data to objects'''
         list_ = List()
         if owner:
@@ -57,3 +57,12 @@ class NewListForm(ItemForm):
         item.list = list_
         item.text = self.cleaned_data['text']
         item.save()
+
+    def save(self, owner):
+        '''save form data to objects'''
+        if owner.is_authenticated:
+            return List.create_new(
+                    item_text=self.cleaned_data['text'], owner=owner)
+        else:
+            return List.create_new(
+                    item_text=self.cleaned_data['text'])

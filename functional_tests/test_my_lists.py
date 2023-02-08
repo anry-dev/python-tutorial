@@ -61,7 +61,7 @@ class MyListsTest(FunctionalTest):
 
         # И видит там свой список дел, названный по первому пункту
         self.wait_for(
-            self.browser.find_element(By.LINK_TEXT, 'Снять шторы')
+            lambda: self.browser.find_element(By.LINK_TEXT, 'Снять шторы')
         )
 
         # Кликает в него и попадает на страничку своего списка дел
@@ -81,7 +81,7 @@ class MyListsTest(FunctionalTest):
         # И проверяет, что новый список отображается в "My lists"
         self.browser.find_element(By.LINK_TEXT, 'My lists').click()
         self.wait_for(
-            self.browser.find_element(By.LINK_TEXT, 'Подмести пол')
+            lambda: self.browser.find_element(By.LINK_TEXT, 'Подмести пол')
         )
         self.browser.find_element(By.LINK_TEXT, 'Подмести пол').click()
         self.wait_for(
@@ -92,7 +92,7 @@ class MyListsTest(FunctionalTest):
         self.browser.find_element(By.LINK_TEXT, 'Log out').click()
         self.wait_for(
             lambda: self.assertEqual(
-                self.browser.find_element(By.LINK_TEXT, 'My lists'),
+                self.browser.find_elements(By.LINK_TEXT, 'My lists'),
                 []
             )
         )
