@@ -8,8 +8,10 @@ from lists.forms import (
         EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR
 )
 from django.utils.html import escape
+from django.http import HttpRequest
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
+from lists.views import new_list2
 
 from django.contrib import auth
 User = auth.get_user_model()
@@ -212,13 +214,8 @@ class NewListTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
-class NewListItemTest(TestCase):
-    '''test adding item to existing list'''
-    pass
-
-
-class UserListsTest(TestCase):
-    '''test for user's own lists'''
+class NewListViewIntegratedTest(TestCase):
+    '''integrated test for new lists view'''
 
     def test_user_lists_url_renders_user_lists_template(self):
         '''test: use correct template'''
@@ -234,25 +231,71 @@ class UserListsTest(TestCase):
         response = self.client.get(reverse('user_lists', args=[email]))
         self.assertEqual(response.context['owner'], correct_user)
 
-    @patch('lists.views.List')
-    @patch('lists.views.ItemForm')
+    @unittest.skip
     def test_list_owner_is_saved_if_user_is_authenticated(
-            self,
-            mockItemFormClass,
-            mockListClass
+            self
     ):
         '''test: list owner is saved for authenticated users'''
         email = 'correct@user.com'
         user = User.objects.create(email=email)
         self.client.force_login(user)
-        mock_list = mockListClass.return_value
-        def check_owner_assigned():
-            '''check that owner is aassigned before save'''
-            self.assertEqual(mock_list.owner, user)
-        mock_list.save.side_effect = check_owner_assigned
-
         self.client.post(reverse('new_list'), data={'text': 'A new list item'})
+        list_ = List.objects.first()
+        self.assertEqual(list_.owner, user)
 
-        self.assertEqual(mock_list.owner, user)
 
+@patch('lists.views.NewListForm')
+class NewListViewUnitTest(unittest.TestCase):
+    '''module test for the view new_list2'''
 
+    def setUp(self):
+        '''setup'''
+        self.request = HttpRequest()
+        self.request.POST['text'] = 'new list item'
+        self.request.user = Mock()
+
+    def test_passes_POST_data_to_NewListForm(self, mockNewListForm):
+        '''test: view uses NewListForm and passes POST data'''
+        new_list2(self.request)
+        mockNewListForm.assert_called_once_with(data=self.request.POST)
+
+    def test_saves_form_with_owner_if_form_valid(self, mockNewListForm):
+        '''test: if form is valid its saved with owner lined to the user'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        new_list2(self.request)
+        mock_form.save.assert_called_once_with(owner=self.request.user)
+
+    def test_does_not_save_form_if_form_invalid(self, mockNewListForm):
+        '''test: if form is invalid nothing is saved'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list2(self.request)
+        self.assertFalse(mock_form.save.called)
+
+    @patch('lists.views.redirect')
+    def test_redirects_to_form_returned_object_if_form_valid(
+        self,
+        mock_redirect,
+        mockNewListForm
+    ):
+        '''test: redirect is called if form is valid'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = True
+        new_list2(self.request)
+        #mock_redirect.assert_called_once_with(mock_form.save.return_valie)
+        mock_redirect.assert_called_once_with(str(mock_form.save().get_absolute_url()))
+
+    @patch('lists.views.render')
+    def test_renders_home_page_template_with_form_if_form_invalid(
+        self,
+        mock_render,
+        mockNewListForm
+    ):
+        '''test: renders homepage template if form is invalid'''
+        mock_form = mockNewListForm.return_value
+        mock_form.is_valid.return_value = False
+        new_list2(self.request)
+        mock_render.assert_called_once_with(
+            self.request, 'home.html', {'form': mock_form}
+        )

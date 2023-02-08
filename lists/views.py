@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 from lists.models import Item, List
-from lists.forms import ItemForm, ExistingListItemForm
+from lists.forms import ItemForm, ExistingListItemForm, NewListForm
 from django.core.exceptions import ValidationError
 
 import logging
@@ -29,6 +29,16 @@ def view_list(request, list_id):
             return redirect(list_)
 
     return render(request, 'list.html', {'list': list_, 'form': form})
+
+def new_list2(request):
+    '''new list - version 2'''
+
+    form = NewListForm(data=request.POST)
+    if form.is_valid():
+        list_ = form.save(owner=request.user)
+        return redirect(str(list_.get_absolute_url()))
+
+    return render(request, 'home.html', {'form': form})
 
 def new_list(request):
     '''new list'''

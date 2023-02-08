@@ -1,5 +1,5 @@
 from django import forms
-from lists.models import Item
+from lists.models import Item, List
 from django.core.exceptions import ValidationError
 
 EMPTY_ITEM_ERROR = "You can't have an empty list item"
@@ -43,3 +43,17 @@ class ExistingListItemForm(ItemForm):
 
     def save(self):
         return forms.models.ModelForm.save(self)
+
+class NewListForm(ItemForm):
+    '''Form for the new list - v2'''
+
+    def save(self, owner):
+        '''save form data to objects'''
+        list_ = List()
+        if owner:
+            list_.owner = owner
+        list_.save()
+        item = Item()
+        item.list = list_
+        item.text = self.cleaned_data['text']
+        item.save()

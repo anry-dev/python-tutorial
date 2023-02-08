@@ -1,10 +1,11 @@
 from django.test import TestCase
 from lists.forms import (
         EMPTY_ITEM_ERROR, DUPLICATE_ITEM_ERROR,
-        ItemForm, ExistingListItemForm
+        ItemForm, ExistingListItemForm, NewListForm
 )
 
 import unittest
+from unittest.mock import patch, Mock
 from lists.models import Item, List
 
 class ItemFormTest(TestCase):
@@ -65,3 +66,32 @@ class ExistingListItemFormTest(TestCase):
         form = ExistingListItemForm(for_list=list_, data={'text': 'form.save'})
         item = form.save()
         self.assertEqual(item, Item.objects.all()[0])
+
+class NewListFormTest(unittest.TestCase):
+    '''NewListForm tests'''
+
+    @patch('lists.forms.List')
+    @patch('lists.forms.Item')
+    def test_save_creates_new_list_and_item_from_POST_data(
+        self,
+        mockItem,
+        mockList
+    ):
+        '''test: NewListForm.save creates new List and Item objects'''
+        mock_item = mockItem.return_value
+        mock_list = mockList.return_value
+        user = Mock()
+        form = NewListForm(data={'text': 'new item text'})
+        form.is_valid()
+
+        def check_item_text_and_list():
+            '''check item.text and item.list attibutes'''
+            self.assertEqual(mock_item.text, 'new item text')
+            self.assertEqual(mock_item.list, mock_list)
+            self.assertTrue(mock_list.save.called)
+
+        mock_item.save.side_effect = check_item_text_and_list
+
+        form.save(owner=user)
+
+        self.assertTrue(mock_item.save.called)
