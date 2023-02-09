@@ -1,0 +1,9 @@
+pip install -r requirements-jenkins.txt
+export OPENSSL_CONF=/etc/ssl
+for f in lists/static/tests/test*.html
+do
+    printf "\nrunning test $f"
+    phantomjs lists/static/tests/runner.js $f
+done
+python manage.py test accounts
+python manage.py test functional_tests
