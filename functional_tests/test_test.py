@@ -36,3 +36,23 @@ class ScreenDumpTest(FunctionalTest):
         self.browser.get(self.live_server_url)
         self.fail()
 
+@unittest.skip
+class ScreenGeometryTest(FunctionalTest):
+    '''test browser screen geometry changing'''
+
+    def test_positional_and_sizing(self):
+        '''test we can change browser size and position'''
+        position = self.browser.set_window_position(0, 0)
+
+        position = self.browser.get_window_position()
+        self.assertEqual(
+                position,
+                {'x': 0, 'y': 0}
+        )
+
+        self.browser.set_window_size(480, 360)
+        size = self.browser.get_window_size()
+        self.assertEqual(
+                size,
+                {'width': 480, 'height': 360}
+        )

@@ -67,9 +67,18 @@ def waitt(wait_time = MAX_WAIT, step = 0.5):
 class FunctionalTest(StaticLiveServerTestCase):
     '''функциональный тест - обертка'''
 
+    def runBrowser(opts=None):
+        '''run Firefix with preset size'''
+        if opts is None:
+            opts = webdriver.FirefoxOptions()
+            opts.add_argument("--width=800")
+            opts.add_argument("--height=600")
+        return webdriver.Firefox(options=opts)
+
     def setUp(self):
         '''setup'''
-        self.browser = webdriver.Firefox()
+        #self.browser = webdriver.Firefox()
+        self.browser = FunctionalTest.runBrowser()
         self.staging_server = os.environ.get('STAGING_SERVER')
         if self.staging_server:
             print('Setting staging server to: %s' % (self.staging_server,))
@@ -78,7 +87,8 @@ class FunctionalTest(StaticLiveServerTestCase):
 
     def tearDown(self):
         '''shutdown'''
-        if self._test_has_failed():
+        #if self._test_has_failed():
+        if self._need_dumps():
             if not SCREEN_DUMP_LOCATION.exists():
                 SCREEN_DUMP_LOCATION.mkdir()
             for ix, handle in enumerate(self.browser.window_handles):
@@ -89,6 +99,10 @@ class FunctionalTest(StaticLiveServerTestCase):
 
         self.browser.quit()
         super().tearDown()
+
+    def _need_dumps(self):
+        '''check do we need to save dumps'''
+        return self._test_has_failed() and os.environ.get('SUPERLIST_DUMP')
 
     def _test_has_failed(self):
         '''check that test has failed'''
