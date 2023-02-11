@@ -25,7 +25,7 @@ class SharingTest(FunctionalTest):
 
         # Ее друг Tom тоже пользователь суперсписков
         tom_browser = FunctionalTest.runBrowser()
-        self.addCleanup(lambda: quit_if_possible(oni_browser))
+        self.addCleanup(lambda: quit_if_possible(tom_browser))
         self.browser = tom_browser
         self.browser.set_window_size(500, 600)
         self.browser.set_window_position(520, 0)
@@ -50,9 +50,24 @@ class SharingTest(FunctionalTest):
         # Tom переходит к своим спискам доступа
         self.browser = tom_browser
         ListPage(self).start()
-        MyListsPage(self).start()
+        list_page.go_to_my_lists_page()
 
         # И видит на ней список от Эдит
         # И переходит на него
         self.browser.find_element(By.LINK_TEXT, 'Get help').click()
+        
+        # На странице, которую он видет, говорится,
+        # что это список от Эдит
+        self.wait_for( lambda: self.assertEqual(
+            list_page.get_list_owner(),
+            'edith@example.com'
+        ))
+
+        # Он добавляет новый элемент в список
+        list_page.add_list_item('Привет, Эдит!')
+        
+        # Когда Эдит обновляет страницу она видит запись от Тома
+        self.browser = edith_browser
+        self.browser.refresh()
+        list_page.wait_for_row_in_linst_table('Привет, Эдит!', 2)
 
