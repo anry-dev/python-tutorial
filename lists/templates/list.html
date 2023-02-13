@@ -21,7 +21,7 @@ Your To-Do list
 
 {% block shared_with %}
   {% if user == list.owner %}
-      <h4>Совместный доступ:</h4>
+      <h5>Открыт</h5>
       <table id="id_shared_with_table" class="table">
 	{% for user in list.shared_with.all %}
   	  <tr><td class="list-sharee">{{ user.email }}</td></tr>
@@ -33,7 +33,7 @@ Your To-Do list
 {% block share_list %}
   {% if user == list.owner %}
     <form method="POST" action="{% url 'share_list' list.id %}">
-      <h4>Поделиться:</h4>
+      <h5>Поделиться ...</h5>
       <input class="form-control" name="sharee" placeholder="your-friend@example.com" type="text" />
       {% csrf_token %}
     </form>
