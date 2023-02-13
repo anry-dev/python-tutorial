@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 
-{% block header_text %}Your To-Do list{% endblock %}
+{% block header_text %}
+{% if user.is_authenticated and user != list.owner %}
+<span id="id_list_owner">{{ list.owner.email }}</span> list
+{% else %}
+Your To-Do list
+{% endif %}
+{% endblock %}
+{# {% block header_text %}Your To-Do list{% endblock %} #}
 
 {% block form_action %}{% url 'view_list' list.id %}{% endblock %}
 
@@ -10,4 +17,25 @@
 		<tr><td>{{ forloop.counter }}: {{ item.text}}</td></tr>
 	{% endfor %}
 </table>
+{% endblock %}
+
+{% block shared_with %}
+  {% if user == list.owner %}
+      <h4>Совместный доступ:</h4>
+      <table id="id_shared_with_table" class="table">
+	{% for user in list.shared_with.all %}
+  	  <tr><td class="list-sharee">{{ user.email }}</td></tr>
+	{% endfor %}
+       </table>
+  {% endif %}
+{% endblock %}
+
+{% block share_list %}
+  {% if user == list.owner %}
+    <form method="POST" action="{% url 'share_list' list.id %}">
+      <h4>Поделиться:</h4>
+      <input class="form-control" name="sharee" placeholder="your-friend@example.com" type="text" />
+      {% csrf_token %}
+    </form>
+  {% endif %}
 {% endblock %}

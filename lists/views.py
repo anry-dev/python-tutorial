@@ -40,10 +40,21 @@ def new_list(request):
 
     return render(request, 'home.html', {'form': form})
 
-def user_lists(request, email):
+def my_lists(request, email):
     '''per-user lists view'''
 
     owner = User.objects.get(email=email)
 
-    return render(request, 'user_lists.html', {'owner': owner,})
+    return render(request, 'my_lists.html', {'owner': owner,})
 
+
+def share_list(request, list_id):
+    '''list sharing between users'''
+
+    list_ = List.objects.get(id=list_id)
+    if request.method == 'POST' and request.user == list_.owner:
+        email = request.POST.get('sharee')
+        user, _ = User.objects.get_or_create(email=email)
+        list_.shared_with.add(user)
+
+    return redirect(list_)

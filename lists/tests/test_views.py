@@ -16,6 +16,9 @@ from lists.views import new_list
 from django.contrib import auth
 User = auth.get_user_model()
 
+import logging
+logger = logging.getLogger(__name__)
+
 # Create your tests here.
 class HomePageTest(TestCase):
     '''test for correct home page'''
@@ -156,6 +159,15 @@ class ListViewTest(TestCase):
         self.assertTemplateUsed(response, 'list.html')
         self.assertEqual(Item.objects.all().count(), 1)
 
+    def test_list_sharing_is_shown_only_to_the_owner(self):
+        '''test: list sharing form is shown only to list's owner'''
+        owner = User.objects.create(email='owner@email')
+        list_ = List.objects.create(owner=owner)
+        user = User.objects.create(email='user@email')
+        self.client.force_login(user)
+        response = self.client.get(reverse('view_list', args=[list_.id]))
+        self.assertNotContains(response, 'sharee')
+
 class NewListTest(TestCase):
     '''test creating a new list'''
 
@@ -216,21 +228,21 @@ class NewListTest(TestCase):
         self.assertEqual(List.objects.count(), 0)
         self.assertEqual(Item.objects.count(), 0)
 
-class NewListViewIntegratedTest(TestCase):
+class MyListsViewIntegratedTest(TestCase):
     '''integrated test for new lists view'''
 
-    def test_user_lists_url_renders_user_lists_template(self):
+    def test_my_lists_url_renders_my_lists_template(self):
         '''test: use correct template'''
         User.objects.create(email='a@b.c')
-        response = self.client.get(reverse('user_lists', args=['a@b.c']))
-        self.assertTemplateUsed(response, 'user_lists.html')
+        response = self.client.get(reverse('my_lists', args=['a@b.c']))
+        self.assertTemplateUsed(response, 'my_lists.html')
 
     def test_passes_correct_owner_to_template(self):
         '''test: we pass correct owner to render'''
         User.objects.create(email='some@user')
         email = 'correct@user.com'
         correct_user = User.objects.create(email=email)
-        response = self.client.get(reverse('user_lists', args=[email]))
+        response = self.client.get(reverse('my_lists', args=[email]))
         self.assertEqual(response.context['owner'], correct_user)
 
     def test_list_owner_is_saved_if_user_is_authenticated(
@@ -243,6 +255,18 @@ class NewListViewIntegratedTest(TestCase):
         self.client.post(reverse('new_list'), data={'text': 'A new list item'})
         list_ = List.objects.first()
         self.assertEqual(list_.owner, user)
+
+    def test_shows_others_shared_lists_for_authenticated_user(self):
+        '''test: authenticated users can see others' lists shared with them'''
+        owner = User.objects.create(email='the@list.owner')
+        list_ = List.objects.create(owner=owner)
+        Item.objects.create(text='sharing test 1234', list=list_)
+        user = User.objects.create(email='just@a.user')
+        list_.shared_with.add(user)
+        self.client.force_login(user)
+        response = self.client.get(reverse('my_lists', args=[user.email]))
+        self.assertContains(response, "Others' shared lists")
+        self.assertContains(response, 'sharing test 1234')
 
 
 @patch('lists.views.NewListForm')
@@ -301,3 +325,58 @@ class NewListViewUnitTest(unittest.TestCase):
         mock_render.assert_called_once_with(
             self.request, 'home.html', {'form': mock_form}
         )
+
+class ShareListTest(TestCase):
+    '''test list sharing view'''
+
+    def test_post_redirects_to_lists_page(self):
+        '''test: list sharing accepts POST request and redirects to list url'''
+        email = 'share-redirect-test@b.c'
+        list_ = List.objects.create()
+        response = self.client.post(
+            reverse('share_list', args=[list_.id]),
+            data={'sharee': email,}
+        )
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(
+            response.url,
+            reverse('view_list', args=[list_.id])
+        )
+
+    def test_list_can_not_be_shared_by_anonymous(self):
+        '''test: only list owner can share the list'''
+        owner = User.objects.create(email='owner@email')
+        list_ = List.objects.create(owner=owner)
+        self.client.post(
+            reverse('share_list', args=[list_.id]),
+            data={'sharee': 'share-email@dot.com',}
+        )
+        self.assertEqual(len(list_.shared_with.all()), 0)
+
+    def test_list_can_not_be_shared_by_other_users(self):
+        '''test: only list owner can share the list'''
+        owner = User.objects.create(email='owner@email')
+        list_ = List.objects.create(owner=owner)
+        user = User.objects.create(email='user@email')
+        self.client.force_login(user)
+        self.client.post(
+            reverse('share_list', args=[list_.id]),
+            data={'sharee': 'share-email@dot.com',}
+        )
+        self.assertEqual(len(list_.shared_with.all()), 0)
+
+    def test_list_can_be_shared_by_the_owner(self):
+        '''test: email is added to list shared_with set'''
+        owner = User.objects.create(email='owner@email')
+        user = User.objects.create(email='share-email@dot.com')
+        list_ = List.objects.create(owner=owner)
+        self.client.force_login(owner)
+        self.client.post(
+            reverse('share_list', args=[list_.id]),
+            data={'sharee': 'share-email@dot.com',}
+        )
+
+        self.assertEqual(len(list_.shared_with.all()), 1)
+        self.assertIn(user, list_.shared_with.all())
+

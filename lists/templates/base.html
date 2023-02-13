@@ -18,7 +18,7 @@
 		<a class="navbar-brand" href="/">Superlists</a>
 		{% if user.is_authenticated and user.email %}
 		  <ul class="nav navbar-nav navbar-left">
-		    <li><a href="{% url 'user_lists' user.email %}">My lists</a></li>
+		    <li><a href="{% url 'my_lists' user.email %}">My lists</a></li>
 		  </ul>
 		  <ul class="nav navbar-nav navbar-right">
 		    <li class="navbar-text">Logged in as {{ user.email }}</li>
@@ -80,6 +80,21 @@
 		{% endblock %}
 	      </div>
 	    </div>
+
+	    {% if user.is_authenticated %}
+	    <div class="row">
+	      <div class="col-md-6 col-md-offset-3">
+		{% block others_lists %}
+		{% endblock %}
+		{% block shared_with %}
+		{% endblock %}
+	      </div>
+	      <div class="col-md-3 col-md=offset=6">
+		 {% block share_list %}
+		 {% endblock %}
+	      </div>
+	    </div>
+	    {% endif %}
 
 	  </div>
 	  <script src="/static/jquery.js"></script>

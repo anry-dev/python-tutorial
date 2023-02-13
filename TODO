@@ -1,1 +1,3 @@
 - make send_mail parameters config via variables
+- fix User model to forbid empty emails
+- separate list_page and my_lists_page classes 

@@ -135,7 +135,7 @@ class ListPage(object):
         self.get_share_box().send_keys(email)
         self.get_share_box().send_keys(Keys.ENTER)
         self.test.wait_for(
-            lambda: self.test.AssertIn(
+            lambda: self.test.assertIn(
                 email,
                 [item.text for item in self.get_shared_with_list()]
             )

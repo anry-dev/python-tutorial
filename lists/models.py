@@ -1,8 +1,19 @@
 from django.db import models
 from django.urls import reverse
 from django.conf import settings
+from accounts.models import User
 
 # Create your models here.
+#class SharedWith(models.Model):
+#    '''list shared_with objects - just email'''
+#
+#    #email = models.EmailField(unique=True)
+#    email = models.EmailField(primary_key=True)
+#
+#    def __str__(self):
+#        return self.email
+
+
 class List(models.Model):
     '''To-Do list identified'''
 
@@ -12,6 +23,11 @@ class List(models.Model):
             null=True,
             on_delete=models.CASCADE,
     )
+
+    shared_with = models.ManyToManyField(
+            settings.AUTH_USER_MODEL,
+            related_name='shared',
+            )
 
     def get_absolute_url(self):
         '''return absolute url for the object'''

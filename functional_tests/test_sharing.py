@@ -69,5 +69,5 @@ class SharingTest(FunctionalTest):
         # Когда Эдит обновляет страницу она видит запись от Тома
         self.browser = edith_browser
         self.browser.refresh()
-        list_page.wait_for_row_in_linst_table('Привет, Эдит!', 2)
+        list_page.wait_for_row_in_list_table('Привет, Эдит!', 2)
 

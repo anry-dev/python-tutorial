@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.contrib import auth
 from django.core.exceptions import ValidationError
 from accounts.models import Token
+import unittest
 
 User = auth.get_user_model()
 
@@ -24,6 +25,14 @@ class UserModelTest(TestCase):
         #user.backend = ''
         request = self.client.request().wsgi_request
         auth.login(request, user)
+
+    @unittest.skip
+    def test_empty_email_is_invalid(self):
+        '''test: can not create user with empty email'''
+        with self.assertRaises(ValidationError):
+            user = User.objects.create(email='')
+            user.save()
+            #User.objects.create(email='')
 
 class TokenModelTest(TestCase):
     '''test token model'''
